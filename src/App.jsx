@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import MaterialReactTable from "material-react-table";
+import { MaterialReactTable } from "material-react-table";
 import axios from "axios";
 import { MRT_Localization_ES } from "material-react-table/locales/es";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import {
   Box,
+  Collapse,
   Button,
   Dialog,
   DialogActions,
@@ -15,12 +18,9 @@ const Carrito = () => {
   const [carts, setCarts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile] = useState(window.innerWidth <= 600);
-  const [clientDialogOpen, setClientDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
-  const [clientData, setClientData] = useState(null);
-  const [cartDetails, setCartDetails] = useState(null);
-  const [shippingData, setShippingData] = useState(null);
+  const [variantesDialogOpen, setVarianteDialogOpen] = useState(false);
+  const [varianteData, setVarianteData] = useState(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,38 +46,14 @@ const Carrito = () => {
     return theme.palette.grey[500];
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(value);
+  const handleOpenVarianteDialog = (variante) => {
+    setVarianteData(variante);
+    setVarianteDialogOpen(true);
+    console.log(carts);
   };
 
-  const handleOpenClientDialog = (client) => {
-    setClientData(client);
-    setClientDialogOpen(true);
-  };
-
-  const handleOpenDetailsDialog = (details) => {
-    setCartDetails(details);
-    setDetailsDialogOpen(true);
-  };
-
-  const handleOpenShippingDialog = (shipping) => {
-    setShippingData(shipping);
-    setShippingDialogOpen(true);
-  };
-
-  const handleCloseClientDialog = () => {
-    setClientDialogOpen(false);
-  };
-
-  const handleCloseDetailsDialog = () => {
-    setDetailsDialogOpen(false);
-  };
-
-  const handleCloseShippingDialog = () => {
-    setShippingDialogOpen(false);
+  const handleCloseVarianteDialog = () => {
+    setVarianteDialogOpen(false);
   };
 
   const columns = [
@@ -96,6 +72,12 @@ const Carrito = () => {
       accessorKey: "data.marca",
       header: "Creación",
       size: "auto",
+      subRows: [
+        {
+          id: 2,
+          name: "Jane Doe",
+        },
+      ],
       muiTableHeadCellProps: {
         align: "center",
       },
@@ -117,6 +99,17 @@ const Carrito = () => {
     {
       accessorKey: "data.nombre",
       header: "Nombre",
+      size: "auto",
+      muiTableHeadCellProps: {
+        align: "center",
+      },
+      muiTableBodyCellProps: {
+        align: "center",
+      },
+    },
+    {
+      accessorKey: "data.descripcion_corta",
+      header: "Descripcion",
       size: "auto",
       muiTableHeadCellProps: {
         align: "center",
@@ -170,11 +163,75 @@ const Carrito = () => {
       },
     },
   ];
+  // const masInfo = [
+  //   {
+  //     accessorKey: "data.tool_tip",
+  //     header: "Descripcion",
+  //     size: "auto",
+  //     muiTableHeadCellProps: {
+  //       align: "center",
+  //     },
+  //     muiTableBodyCellProps: {
+  //       align: "center",
+  //     },
+  //   },
+  // ];
 
-  const clientColumns = [
+  const variantesColumns = [
     {
-      accessorKey: "invitado",
-      header: "Invitado",
+      accessorKey: "data.nombre_completo",
+      header: "Nombre",
+      size: "auto",
+      subRows: [
+        {
+          id: 2,
+          name: "Jane Doe",
+        },
+      ],
+      muiTableHeadCellProps: {
+        align: "center",
+      },
+      muiTableBodyCellProps: {
+        align: "center",
+      },
+    },
+    {
+      accessorKey: "data.tool_tip",
+      header: "Descripcion",
+      size: "auto",
+      muiTableHeadCellProps: {
+        align: "center",
+      },
+      muiTableBodyCellProps: {
+        align: "center",
+      },
+    },
+    {
+      accessorKey: "data.refuerzo",
+      header: "Refuerzo Del",
+      size: "auto",
+      muiTableHeadCellProps: {
+        align: "center",
+      },
+      muiTableBodyCellProps: {
+        align: "center",
+      },
+    },
+    {
+      accessorKey: "data.color",
+      header: "Color",
+      size: "auto",
+      muiTableHeadCellProps: {
+        align: "center",
+      },
+      muiTableBodyCellProps: {
+        align: "center",
+      },
+    },
+
+    {
+      accessorKey: "data.precio.cantidad",
+      header: "Precio",
       size: "auto",
       muiTableHeadCellProps: {
         align: "center",
@@ -184,175 +241,13 @@ const Carrito = () => {
       },
       Cell: ({ cell }) => {
         const status = cell.getValue();
+
         return (
-          <Box
-            sx={(theme) => ({
-              display: "flex",
-              margin: "auto",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: getBackgroundColor(status, theme),
-              borderRadius: "4px",
-              color: "#ffffff",
-              fontWeight: "bold",
-              width: "48%",
-              p: "0.2rem",
-            })}
-          >
-            {status === true ? "INVITADO" : "CLIENTE"}
-          </Box>
+          <>
+            <span>${status}MXN</span>
+          </>
         );
       },
-    },
-    {
-      accessorKey: "nombre",
-      header: "Nombre",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-    {
-      accessorKey: "email",
-      header: "Email",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-    {
-      accessorKey: "telefono",
-      header: "Teléfono",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-  ];
-
-  const detailColumns = [
-    {
-      accessorKey: "nombreProducto",
-      header: "Producto",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-    {
-      accessorKey: "referenciaProductoProveedor",
-      header: "Referencia",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-    {
-      accessorKey: "precioUnitario",
-      header: "Precio Unitario",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => <span>{formatCurrency(cell.getValue())} MXN</span>,
-    },
-    {
-      accessorKey: "cantidad",
-      header: "Cantidad",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-    },
-    {
-      accessorKey: "precioTotal",
-      header: "Precio Total",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => <span>{formatCurrency(cell.getValue())} MXN</span>,
-    },
-  ];
-
-  const shippingColumns = [
-    {
-      accessorKey: "entregaEstimada",
-      header: "Entrega Estimada",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => (
-        <span>{new Date(cell.getValue()).toLocaleDateString()}</span>
-      ),
-    },
-    {
-      accessorKey: "fechaCreacion",
-      header: "Fecha de Creación",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => (
-        <span>{new Date(cell.getValue()).toLocaleDateString()}</span>
-      ),
-    },
-    {
-      accessorKey: "fechaModificacion",
-      header: "Fecha de Modificación",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => (
-        <span>{new Date(cell.getValue()).toLocaleDateString()}</span>
-      ),
-    },
-    {
-      accessorKey: "total",
-      header: "Total",
-      size: "auto",
-      muiTableHeadCellProps: {
-        align: "center",
-      },
-      muiTableBodyCellProps: {
-        align: "center",
-      },
-      Cell: ({ cell }) => <span>{formatCurrency(cell.getValue())} MXN</span>,
     },
   ];
 
@@ -394,11 +289,10 @@ const Carrito = () => {
           },
         }}
         localization={MRT_Localization_ES}
-        enableRowSelection={false}
-        enableColumnFilterModes
+        enableColumnFilterModes={true}
         enableStickyHeader
         initialState={{
-          pagination: { pageIndex: 0, pageSize: 10 },
+          pagination: { pageIndex: 0, pageSize: 100 },
           density: "compact",
         }}
         columns={columns}
@@ -406,12 +300,14 @@ const Carrito = () => {
         enableColumnOrdering
         data={carts}
         enableFullScreenToggle={false}
-        enableRowActions
+        enableRowActions={true}
         state={{ isLoading }}
         renderRowActions={({ row }) => (
           <Box sx={{ display: "flex", gap: "0.5rem" }}>
             <Button
-              onClick={() => handleOpenShippingDialog(row.original.envio)}
+              onClick={() =>
+                handleOpenVarianteDialog(row.original.data.variantes)
+              }
               variant="contained"
               color="success"
               size="small"
@@ -423,68 +319,26 @@ const Carrito = () => {
       />
 
       <Dialog
-        open={clientDialogOpen}
-        onClose={handleCloseClientDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Datos del Cliente</DialogTitle>
-        <DialogContent>
-          {clientData && (
-            <MaterialReactTable
-              columns={clientColumns}
-              data={[clientData]}
-              enableFullScreenToggle={false}
-              localization={MRT_Localization_ES}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseClientDialog}>Cerrar</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={detailsDialogOpen}
-        onClose={handleCloseDetailsDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Detalles del Carrito</DialogTitle>
-        <DialogContent>
-          {cartDetails && (
-            <MaterialReactTable
-              columns={detailColumns}
-              data={cartDetails}
-              enableFullScreenToggle={false}
-              localization={MRT_Localization_ES}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDetailsDialog}>Cerrar</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={shippingDialogOpen}
-        onClose={handleCloseShippingDialog}
+        open={variantesDialogOpen}
+        onClose={handleCloseVarianteDialog}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>Datos del Envío</DialogTitle>
         <DialogContent>
-          {shippingData && (
+          {varianteData && (
             <MaterialReactTable
-              columns={shippingColumns}
-              data={[shippingData]}
+              columns={variantesColumns}
+              data={varianteData}
               enableFullScreenToggle={false}
+              enableExpanding={true}
+              enableRowSelection={true}
               localization={MRT_Localization_ES}
             />
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseShippingDialog}>Cerrar</Button>
+          <Button onClick={handleCloseVarianteDialog}>Cerrar</Button>
         </DialogActions>
       </Dialog>
     </>
